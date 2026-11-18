@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Descent</title>
+  <meta name="description" content="Descent: an interactive dive 10,935 metres down through the five zones of the ocean to the bottom of the Mariana Trench. Built with three.js." />
+  <meta name="theme-color" content="#02070d" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%2302070d'/%3E%3Cpath d='M16 7v15M10 17l6 6 6-6' stroke='%237fe7ff' stroke-width='2.4' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..500;1,9..144,200..400&family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <!-- Preloader -->
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="loader-inner">
+      <span class="loader-label">Pressurising</span>
+      <span class="loader-num"><span id="loader-num">0</span>%</span>
+    </div>
+  </div>
+
+  <canvas id="gl" aria-hidden="true"></canvas>
+  <div class="cursor" id="cursor" aria-hidden="true"><i></i></div>
+
+  <!-- Fixed chrome -->
+  <header class="chrome-top">
+    <a href="#hero" class="mark" aria-label="Descent, back to the surface">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v16M6 13l6 6 6-6"/></svg>Descent
+    </a>
+    <p class="chrome-note">An expedition to the deepest point on Earth</p>
+  </header>
+
+  <aside class="gauge" aria-label="Current depth">
+    <div class="gauge-read">
+      <span class="gauge-label">Depth</span>
+      <span class="gauge-num"><span id="depth">0</span><small>m</small></span>
+      <span class="gauge-sub" id="pressure">1 atm</span>
+    </div>
+    <div class="gauge-track" aria-hidden="true">
+      <i class="gauge-fill" id="gauge-fill"></i>
+      <ol class="gauge-ticks">
+        <li style="--p:0"><span>0</span></li>
+        <li style="--p:.2"><span>200</span></li>
+        <li style="--p:.4"><span>1k</span></li>
+        <li style="--p:.6"><span>4k</span></li>
+        <li style="--p:.8"><span>6k</span></li>
+        <li style="--p:1"><span>11k</span></li>
+      </ol>
+    </div>
+    <span class="gauge-zone" id="zone-name">Sea level</span>
+  </aside>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero" id="hero">
+      <p class="hero-kicker reveal">Pacific Ocean · 11°22′N 142°35′E</p>
+      <h1 class="hero-title" aria-label="Descent">
+        <span class="ch" style="--i:0">D</span><span class="ch" style="--i:1">e</span><span class="ch" style="--i:2">s</span><span class="ch" style="--i:3">c</span><span class="ch" style="--i:4">e</span><span class="ch" style="--i:5">n</span><span class="ch" style="--i:6">t</span>
+      </h1>
+      <div class="hero-foot">
+        <p class="hero-lede reveal">Ten thousand nine hundred and thirty-five metres. Five zones of darkness. One scroll.</p>
+        <a class="scroll-cue" href="#sunlight"><span>Scroll to dive</span><i></i></a>
+      </div>
+    </section>
+
+    <!-- ZONES -->
+    <section class="zone" id="sunlight" data-zone="0">
+      <div class="zone-card">
+        <p class="zone-meta reveal"><span>01</span>Epipelagic · 0 – 200 m</p>
+        <h2 class="reveal">The <em>Sunlight</em> zone</h2>
+        <p class="zone-body reveal">Light pours in from above and fuels nearly all photosynthesis in the sea. The microscopic phytoplankton drifting here help make the air you're breathing right now.</p>
+        <div class="stat reveal"><b>~50%</b><span>of Earth's oxygen is produced by ocean phytoplankton</span></div>
+      </div>
+    </section>
+
+    <section class="zone right" id="twilight" data-zone="1">
+      <div class="zone-card">
+        <p class="zone-meta reveal"><span>02</span>Mesopelagic · 200 – 1,000 m</p>
+        <h2 class="reveal">The <em>Twilight</em> zone</h2>
+        <p class="zone-body reveal">Sunlight thins to a faint blue, too weak for plants. Every night, enormous numbers of animals rise from here toward the surface to feed, then sink back before dawn: the biggest daily migration on the planet.</p>
+        <div class="stat reveal"><b>&lt;1%</b><span>of surface sunlight reaches the top of this zone</span></div>
+      </div>
+    </section>
+
+    <section class="zone" id="midnight" data-zone="2">
+      <div class="zone-card">
+        <p class="zone-meta reveal"><span>03</span>Bathypelagic · 1,000 – 4,000 m</p>
+        <h2 class="reveal">The <em>Midnight</em> zone</h2>
+        <p class="zone-body reveal">No sunlight ever reaches this deep. The only light is made by the animals themselves, in flashes and glowing lures used to hunt, hide and find a mate.</p>
+        <p class="hint reveal"><i></i>Move your cursor through the dark</p>
+        <div class="stat reveal"><b>~4°C</b><span>typical water temperature, all year round</span></div>
+      </div>
+    </section>
+
+    <section class="zone right" id="abyss" data-zone="3">
+      <div class="zone-card">
+        <p class="zone-meta reveal"><span>04</span>Abyssopelagic · 4,000 – 6,000 m</p>
+        <h2 class="reveal">The <em>Abyss</em></h2>
+        <p class="zone-body reveal">Near-freezing water over vast plains of fine sediment. Food arrives mostly as "marine snow": flakes of dead plankton and debris that take weeks to drift down from above.</p>
+        <div class="stat reveal"><b>~500×</b><span>the air pressure at the surface, at 5,000 m</span></div>
+      </div>
+    </section>
+
+    <section class="zone" id="hadal" data-zone="4">
+      <div class="zone-card">
+        <p class="zone-meta reveal"><span>05</span>Hadalpelagic · 6,000 – 10,935 m</p>
+        <h2 class="reveal">The <em>Hadal</em> zone</h2>
+        <p class="zone-body reveal">Named after Hades, the Greek underworld. These are the trenches, deep scars where one tectonic plate dives beneath another. Your torch is the only light down here.</p>
+        <div class="stat reveal"><b>~1,100</b><span>atmospheres of pressure at the bottom</span></div>
+      </div>
+    </section>
+
+    <!-- FLOOR -->
+    <section class="floor" id="floor">
+      <p class="zone-meta reveal"><span>◆</span>Challenger Deep · Mariana Trench</p>
+      <h2 class="floor-num reveal">10,935<small>m</small></h2>
+      <p class="floor-body reveal">If Mount Everest stood on this spot, its summit would still be about two kilometres underwater.</p>
+      <a class="ascend" href="#hero" id="ascend">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20V5M6 11l6-6 6 6"/></svg>Return to the surface
+      </a>
+      <footer class="credit">
+        <p>Descent is a portfolio piece built with three.js: custom GLSL shaders, scroll-driven camera, bloom post-processing. Depth figures are approximate.</p>
+      </footer>
+    </section>
+  </main>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
